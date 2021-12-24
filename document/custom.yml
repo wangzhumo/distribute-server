@@ -1,0 +1,9 @@
+kind: reverse
+name: mydb
+source:
+  database: mysql
+  conn_str: '../testdata/test.db'
+targets:
+- type: codes
+  language: golang
+  output_dir: ../models
