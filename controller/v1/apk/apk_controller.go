@@ -22,6 +22,7 @@ func Routers(r *gin.RouterGroup) {
 	rr.POST("/create", createApkProject)
 	rr.POST("/upload", uploadApkFile)
 	rr.GET("/download", downloadApkFile)
+	rr.POST("/update/version", updateVersionInfo)
 }
 
 // 创建一个APK项目
@@ -217,6 +218,10 @@ func downloadApkFile(c *gin.Context) {
 		})
 	}
 
+	// 数据库下载次数增加
+	findApk.Downloads += 1
+	mysql.InstanceDB().Save(findApk)
+
 	// 写入qrcode
 	findApk.QrcodeURL = fmt.Sprintf("%s=%d", "v1/apk/download?id", findApk.ID)
 	file, err := os.OpenFile(findApk.ApkURL, 2, 0666)
@@ -232,4 +237,30 @@ func downloadApkFile(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/zip")
 	// 去获取文件返回
 	c.File(findApk.ApkURL)
+}
+
+// 更新应用信息
+func updateVersionInfo(c *gin.Context)  {
+	versionId, err := strconv.Atoi(c.Query("id"))
+	if err != nil || versionId == 0 {
+		c.JSON(http.StatusOK, &models.Response{
+			Code:    conf.ERROR_PARAMS_INVIDE,
+			Message: "需要AppID参数",
+		})
+		return
+	}
+
+	// 获取ID
+	findApk := &model.Version{ID: 0}
+	// 先查找
+	mysql.InstanceDB().Where(&model.Version{
+		ID: int32(versionId),
+	}).Find(findApk)
+
+	// 数据库下载次数增加
+	findApk.Downloads += 1
+	mysql.InstanceDB().Save(findApk)
+
+	// 返回
+	models.Success(c,findApk)
 }

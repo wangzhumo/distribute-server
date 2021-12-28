@@ -25,13 +25,21 @@ func GetApkVersionList(c *gin.Context) {
 	lastId := c.Query("last_id")
 	size := c.Query("size")
 	typeValue := c.Query("type")
-	if lastId == "" || size == "" || typeValue == "" {
+	appID := c.Query("app_id")
+	if lastId == "" || size == "" || typeValue == "" || appID == "" {
 		c.JSON(http.StatusOK, &models.Response{
 			Code:    conf.ERROR_PARAMS_INVIDE,
 			Message: "参数异常",
 		})
 	}
 	// 开始查询
+	appIdInt, err := strconv.Atoi(appID)
+	if err != nil {
+		c.JSON(http.StatusOK, &models.Response{
+			Code:    conf.ERROR_PARAMS_INVIDE,
+			Message: err.Error(),
+		})
+	}
 	sizeInt, err := strconv.Atoi(size)
 	if err != nil {
 		c.JSON(http.StatusOK, &models.Response{
@@ -56,11 +64,11 @@ func GetApkVersionList(c *gin.Context) {
 	listData := []model.Version{}
 	// 判断应该查询什么类型的
 	if typeValue == "release" {
-		mysql.InstanceDB().Where("release_version = ? AND id > ?", true, lastIdInt).Limit(sizeInt).Find(&listData)
+		mysql.InstanceDB().Where("apk_id = ? AND release_version = ? AND id > ?", appIdInt,true, lastIdInt).Limit(sizeInt).Find(&listData)
 	} else if typeValue == "debug" {
-		mysql.InstanceDB().Where("release_version = ? AND id > ?", false, lastIdInt).Limit(sizeInt).Find(&listData)
+		mysql.InstanceDB().Where("apk_id = ? AND release_version = ? AND id > ?", appIdInt,false, lastIdInt).Limit(sizeInt).Find(&listData)
 	} else {
-		mysql.InstanceDB().Where("id > ?", lastIdInt).Limit(sizeInt).Find(&listData)
+		mysql.InstanceDB().Where("apk_id = ? AND id > ?",appIdInt, lastIdInt).Limit(sizeInt).Find(&listData)
 	}
 	resp := models.VsersionListResponse{}
 	if len(listData) == 0 || len(listData) < sizeInt {
