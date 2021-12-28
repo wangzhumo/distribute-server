@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"com.wangzhumo.distribute/conf"
 	"com.wangzhumo.distribute/database/mysql"
@@ -80,6 +81,7 @@ func fillQrcodeToResponse(listData []model.Version) {
 	if len(listData) > 0 {
 		for i, v := range listData {
 			v.QrcodeURL = fmt.Sprintf("%s=%d", "v1/apk/download?id", v.ID)
+			v.ApkURL = strings.Replace(v.ApkURL,".data","static",1)
 			listData[i] = v
 		}
 	}

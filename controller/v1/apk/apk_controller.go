@@ -154,7 +154,7 @@ func uploadApkFile(c *gin.Context) {
 
 	versionCode, _ := strconv.Atoi(apkInfo.Build)
 	version := &model.Version{
-		Name:      apkInfo.Name,
+		Name:      apkInfo.Version,
 		Code:      int32(versionCode),
 		Downloads: 0,
 		Changelog: changelog,

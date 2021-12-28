@@ -16,7 +16,7 @@ var instance *gorm.DB
 // 为了避免并发造成问题，加入互斥锁
 var dbLock sync.Mutex
 
-// 获取实例
+// InstanceDB 获取实例
 func InstanceDB() *gorm.DB {
 	if instance != nil {
 		return instance
@@ -31,7 +31,7 @@ func InstanceDB() *gorm.DB {
 	return NewInstance()
 }
 
-// create a new instance of engine
+// NewInstance create a new instance of engine
 func NewInstance() *gorm.DB {
 	mysqlConnConfig := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8",
